@@ -1,0 +1,11 @@
+bot:
+  token: "8864030416:AAELxCAm6RfQS2yRY6kfPi3s2vE5QVlfo5U"  # 从 @BotFather 获取
+  debug: false
+
+database:
+  driver: "sqlite3"
+  dsn: "./data/bot.db"
+
+admin:
+  super_users:
+    - 8195464515  # 替换为你的Telegram用户ID

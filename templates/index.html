@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🤖 方丈机器人管理后台</h1>
+
+        <!-- 统计卡片 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>用户数</h5>
+                    <h3 id="userCount">-</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h5>消息数</h5>
+                    <h3 id="messageCount">-</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h5>定时任务</h5>
+                    <h3 id="scheduleCount">-</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <h5>抽奖次数</h5>
+                    <h3 id="lotteryCount">-</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 选项卡 -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="sensitive-tab" data-bs-toggle="tab" data-bs-target="#sensitive" type="button" role="tab">敏感词管理</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button" role="tab">定时任务</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="send-tab" data-bs-toggle="tab" data-bs-target="#send" type="button" role="tab">发送消息</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- 敏感词管理 -->
+            <div class="tab-pane fade show active" id="sensitive" role="tabpanel">
+                <div class="mt-3">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="newWord" placeholder="输入敏感词">
+                        <button class="btn btn-primary" type="button" onclick="addWord()">添加</button>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>敏感词</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wordTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 定时任务 -->
+            <div class="tab-pane fade" id="schedule" role="tabpanel">
+                <div class="mt-3">
+                    <button class="btn btn-success mb-3" onclick="showAddSchedule()">添加任务</button>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Chat ID</th>
+                                <th>消息</th>
+                                <th>Cron</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 发送消息 -->
+            <div class="tab-pane fade" id="send" role="tabpanel">
+                <div class="mt-3">
+                    <div class="mb-3">
+                        <label class="form-label">Chat ID</label>
+                        <input type="text" class="form-control" id="sendChatID" placeholder="输入 Chat ID">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">消息内容</label>
+                        <textarea class="form-control" id="sendMessage" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 加载统计
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('userCount').textContent = data.user_count;
+                document.getElementById('messageCount').textContent = data.message_count;
+                document.getElementById('scheduleCount').textContent = data.schedule_count;
+                document.getElementById('lotteryCount').textContent = data.lottery_count;
+            });
+
+        // 加载敏感词
+        function loadWords() {
+            fetch('/api/sensitive-words')
+                .then(res => res.json())
+                .then(words => {
+                    const tbody = document.getElementById('wordTable');
+                    tbody.innerHTML = '';
+                    words.forEach(word => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${word.id}</td>
+                            <td>${word.word}</td>
+                            <td><button class="btn btn-sm btn-danger" onclick="deleteWord(${word.id})">删除</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+        loadWords();
+
+        // 添加敏感词
+        function addWord() {
+            const word = document.getElementById('newWord').value;
+            if (!word) return;
+
+            fetch('/api/sensitive-words', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({word: word})
+            })
+            .then(res => res.json())
+            .then(() => {
+                document.getElementById('newWord').value = '';
+                loadWords();
+            });
+        }
+
+        // 删除敏感词
+        function deleteWord(id) {
+            fetch(`/api/sensitive-words/${id}`, {method: 'DELETE'})
+                .then(() => loadWords());
+        }
+
+        // 加载定时任务
+        function loadSchedules() {
+            fetch('/api/schedules')
+                .then(res => res.json())
+                .then(schedules => {
+                    const tbody = document.getElementById('scheduleTable');
+                    tbody.innerHTML = '';
+                    schedules.forEach(s => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${s.id}</td>
+                            <td>${s.chat_id}</td>
+                            <td>${s.message}</td>
+                            <td>${s.cron_spec}</td>
+                            <td>${s.is_active ? '✅' : '❌'}</td>
+                            <td><button class="btn btn-sm btn-danger" onclick="deleteSchedule(${s.id})">删除</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+        loadSchedules();
+
+        // 删除定时任务
+        function deleteSchedule(id) {
+            fetch(`/api/schedules/${id}`, {method: 'DELETE'})
+                .then(() => loadSchedules());
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const chatID = document.getElementById('sendChatID').value;
+            const message = document.getElementById('sendMessage').value;
+
+            if (!chatID || !message) {
+                alert('请填写完整信息');
+                return;
+            }
+
+            fetch('/api/send-message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: chatID, message: message})
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('sendMessage').value = '';
+            });
+        }
+
+        // 显示添加任务表单（简化版）
+        function showAddSchedule() {
+            const chatID = prompt('输入 Chat ID:');
+            const message = prompt('输入消息内容:');
+            const cronSpec = prompt('输入 Cron 表达式:');
+
+            if (chatID && message && cronSpec) {
+                fetch('/api/schedules', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({chat_id: chatID, message: message, cron_spec: cronSpec})
+                })
+                .then(() => loadSchedules());
+            }
+        }
+    </script>
+</body>
+</html>
