@@ -12,10 +12,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
-	"github.com/xxx/fangzhang-bot/internal/handler"
-	"github.com/xxx/fangzhang-bot/internal/middleware"
-	"github.com/xxx/fangzhang-bot/internal/store"
-	"github.com/xxx/fangzhang-bot/internal/web"
+	"github.com/BoyQcb/fangzhang-bot/internal/handler"
+	"github.com/BoyQcb/fangzhang-bot/internal/middleware"
+	"github.com/BoyQcb/fangzhang-bot/internal/store"
+	"github.com/BoyQcb/fangzhang-bot/internal/web"
 	"gopkg.in/yaml.v3"
 )
 
@@ -88,7 +88,6 @@ func startWebServer(b *bot.Bot) {
 	if err := r.Run(":8080"); err != nil {
 		log.Printf("Web 服务器启动失败: %v", err)
 	}
-}
 }
 
 func loadConfig() *Config {
