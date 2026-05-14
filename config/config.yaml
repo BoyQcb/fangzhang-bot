@@ -1,5 +1,5 @@
 bot:
-  token: "8864030416:AAELxCAm6RfQS2yRY6kfPi3s2vE5QVlfo5U"  # 从 @BotFather 获取
+  token: "YOUR_BOT_TOKEN_HERE"  # 替换为你的 Bot Token
   debug: false
 
 database:
@@ -8,4 +8,4 @@ database:
 
 admin:
   super_users:
-    - 8195464515  # 替换为你的Telegram用户ID
+    - 123456789  # 替换为你的 Telegram 用户 ID
