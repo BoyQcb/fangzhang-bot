@@ -1,4 +1,4 @@
-module github.com/xxx/fangzhang-bot
+module github.com/BoyQcb/fangzhang-bot
 
 go 1.21
 
