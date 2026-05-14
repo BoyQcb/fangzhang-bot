@@ -43,7 +43,7 @@
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/BoyQcb/fangzhang-bot.git
+git clone https://github.com/xxx/fangzhang-bot.git
 cd fangzhang-bot
 ```
 
